@@ -17,11 +17,14 @@ class Contacts
       feed = @client.get(CONTACTS_FEED).to_xml
       
       @contacts = feed.elements.to_a('entry').collect do |entry|
-        title, email = entry.elements['title'].text, nil
+        title, email,phone = entry.elements['title'].text, nil,nil
         entry.elements.each('gd:email') do |e|
           email = e.attribute('address').value if e.attribute('primary')
         end
-        [title, email] unless email.nil?
+        entry.elements.each('gd:phoneNumber') do |e|
+          phone = e.attribute('uri').value.gsub(/tel:/,'')
+        end
+        [title, email,phone] unless phone.nil?
       end
       @contacts.compact!
     rescue GData::Client::AuthorizationError => e
